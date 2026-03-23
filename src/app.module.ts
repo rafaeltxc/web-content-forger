@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { LoggerModule } from 'nestjs-pino';
+import { WinstonModule } from 'nest-winston';
 
-import { LoggingConfigModule } from './infrastructure/logging/loggingConfig.module';
+import { LoggingConfigModule } from './infrastructure/logging/logging.module';
 import { LoggingConfig } from './infrastructure/logging/LoggingConfig';
 
 @Module({
   imports: [
-    LoggerModule.forRootAsync({
+    WinstonModule.forRootAsync({
       imports: [LoggingConfigModule],
       inject: [LoggingConfig],
       useFactory: (config: LoggingConfig) => config.getOptions()

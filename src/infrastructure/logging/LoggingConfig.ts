@@ -1,35 +1,65 @@
 import { Injectable } from '@nestjs/common';
-import pino, { DestinationStream } from 'pino';
-import { Params } from 'nestjs-pino';
+import { WinstonModuleOptions } from 'nest-winston';
+import { Format } from 'logform';
+import 'winston-daily-rotate-file';
+import * as winston from 'winston';
 
 @Injectable()
 export class LoggingConfig {
-  public getOptions(): Params {
-    const isProd = process.env.NODE_ENV === 'production';
+  private readonly isProd: boolean;
 
+  constructor() {
+    this.isProd = process.env.NODE_ENV === 'production';
+  }
+
+  public getOptions(): WinstonModuleOptions {
     return {
-      pinoHttp: {
-        level: isProd ? 'info' : 'debug',
-        stream: isProd ? this.getProdDest() : this.getDevDest()
-      }
+      level: this.isProd ? 'info' : 'debug',
+      format: this.getFormat(),
+      transports: [this.getConsoleTransport(), this.getPhysicalTransport()]
     };
   }
 
-  private getDevDest(): DestinationStream {
-    return this.getAsyncDestination('./logs/content-forger.log');
+  private getFileDir(): string {
+    return this.isProd ? '/var/log/content-forger' : './logs';
   }
 
-  private getProdDest(): DestinationStream {
-    return this.getAsyncDestination(
-      '/var/log/content-forger/content-forger.log'
+  private getFormat(): Format {
+    return winston.format.combine(
+      winston.format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
+
+      winston.format((info) => {
+        info.level = info.level.toUpperCase();
+        return info;
+      })()
     );
   }
 
-  private getAsyncDestination(dest: string): DestinationStream {
-    return pino.destination({
-      dest: dest,
-      minLength: 2048,
-      sync: false
+  private getCustomFormat(): Format {
+    return winston.format.printf(({ timestamp, level, message, context }) => {
+      const contextString = context ? `[${context}] ` : '';
+
+      return `[${timestamp}] ${level.toUpperCase()}: ${contextString}${message}`;
+    });
+  }
+
+  private getConsoleTransport(): winston.transport {
+    return new winston.transports.Console({
+      format: winston.format.combine(this.getCustomFormat())
+    });
+  }
+
+  private getPhysicalTransport() {
+    return new winston.transports.DailyRotateFile({
+      dirname: this.getFileDir(),
+      filename: 'forger.%DATE%.log',
+      datePattern: 'DD-MM-YYYY',
+      maxSize: '1g',
+      maxFiles: '5d',
+      format: winston.format.combine(
+        winston.format.uncolorize(),
+        this.getCustomFormat()
+      )
     });
   }
 }

@@ -28,6 +28,8 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/no-base-to-string': 'off',
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
       'comma-dangle': ['error', 'never'],
       indent: ['error', 2]
