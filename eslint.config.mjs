@@ -30,9 +30,9 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-argument': 'warn',
       '@typescript-eslint/restrict-template-expressions': 'off',
       '@typescript-eslint/no-base-to-string': 'off',
-      'prettier/prettier': ['error', { endOfLine: 'auto' }],
+      'prettier/prettier': 'off',
       'comma-dangle': ['error', 'never'],
-      indent: ['error', 2]
+      'indent': ['error', 2]
     }
   }
 );

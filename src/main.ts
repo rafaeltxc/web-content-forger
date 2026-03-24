@@ -1,12 +1,14 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from './main.module';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+const createApp = async () =>
+  NestFactory.create(AppModule, { bufferLogs: true }).then((app) => {
+    app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+    app.enableShutdownHooks();
 
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+    return app;
+  });
 
-  await app.listen(process.env.PORT ?? 3000);
-}
-bootstrap();
+createApp().then((app) =>
+  app.listen(process.env.PORT ?? 3000));
