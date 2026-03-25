@@ -1,4 +1,4 @@
 export enum EnvironmentEnum {
-  AMBIENT,
-  PORT
+  AMBIENT = 'AMBIENT',
+  PORT = 'PORT'
 }
