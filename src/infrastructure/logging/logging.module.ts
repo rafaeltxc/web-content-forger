@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { LoggingConfig } from './LoggingConfig';
+import { LoggingConfig } from './logging.configuration';
 
 @Module({
   providers: [LoggingConfig],

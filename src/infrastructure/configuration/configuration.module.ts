@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { StartupConfig } from './startupConfig';
+import { StartupConfig } from './startup.configuration';
 
 @Module({
   providers: [StartupConfig],
