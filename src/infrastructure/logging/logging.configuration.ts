@@ -4,6 +4,9 @@ import { Format } from 'logform';
 import 'winston-daily-rotate-file';
 import * as winston from 'winston';
 
+/**
+ *
+ */
 @Injectable()
 export class LoggingConfig {
   private readonly isProd: boolean;
@@ -12,6 +15,9 @@ export class LoggingConfig {
     this.isProd = process.env.NODE_ENV === 'production';
   }
 
+  /**
+   *
+   */
   public getOptions(): WinstonModuleOptions {
     return {
       level: this.isProd ? 'info' : 'debug',
@@ -20,13 +26,31 @@ export class LoggingConfig {
     };
   }
 
+  /**
+   *
+   */
   private getFileDir(): string {
     return this.isProd ? '/var/log/content-forger' : './logs';
   }
 
+  /**
+   *
+   */
+  private getLabel(callingModule: NodeModule): string {
+    const parts = callingModule.filename.split('/');
+    return `${parts[parts.length - 2]}/${parts.pop()}`;
+  };
+
+  /**
+   *
+   */
   private getFormat(): Format {
     return winston.format.combine(
-      winston.format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
+      winston.format.timestamp(
+        { format: 'DD-MM-YYYY HH:mm:ss' }),
+
+      winston.format.label(
+        { label: this.getLabel(module) }),
 
       winston.format((info) => {
         info.level = info.level.toUpperCase();
@@ -35,6 +59,9 @@ export class LoggingConfig {
     );
   }
 
+  /**
+   *
+   */
   private getCustomFormat(): Format {
     return winston.format.printf(({ timestamp, level, message, context }) => {
       const contextString = context ? `[${context}] ` : '';
@@ -43,13 +70,19 @@ export class LoggingConfig {
     });
   }
 
+  /**
+   *
+   */
   private getConsoleTransport(): winston.transport {
     return new winston.transports.Console({
       format: winston.format.combine(this.getCustomFormat())
     });
   }
 
-  private getPhysicalTransport() {
+  /**
+   *
+   */
+  private getPhysicalTransport(): winston.transport {
     return new winston.transports.DailyRotateFile({
       dirname: this.getFileDir(),
       filename: 'forger.%DATE%.log',

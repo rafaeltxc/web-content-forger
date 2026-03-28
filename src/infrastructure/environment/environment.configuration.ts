@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EnvironmentEnum } from './environment.enum';
+import { EnvNotFound } from 'src/error/envNotFound.exception';
 
 @Injectable()
 export class EnvironmentConfig {
@@ -14,11 +15,11 @@ export class EnvironmentConfig {
   }
 
   public applySanityCheck(): void {
-    const missingEnvs = this.systemEnvs
-      .filter((env) => this.getEnv(env) == null);
+    const missingEnvs = this.systemEnvs.filter((env) => !this.getEnv(env));
 
     if (missingEnvs.length > 0) {
-      throw new Error(`Missing envs: ${missingEnvs.join(', ')}`);
+      throw new EnvNotFound(`An error was caught validating 
+        environment variables. Missing envs: ${missingEnvs.join(', ')}`);
     }
   }
 }
